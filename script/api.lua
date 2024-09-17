@@ -107,20 +107,24 @@ function atl_server_jail.check_and_apply_jail(player_name)
                 atl_server_jail.unjail_player(player_name)
             end)
 
-            minetest.register_globalstep(function(dtime)
+            -- Schedule periodic updates to decrement remaining time
+            local function update_jail_time()
                 local jail_data = atl_server_jail.get_JailedPlayers()
                 local jail_info = jail_data[player_name]
                 if jail_info then
-                    jail_info.remaining_time = jail_info.remaining_time - dtime
+                    jail_info.remaining_time = jail_info.remaining_time - 1
                     jail_info.last_update = os.time()
                     atl_server_jail.set_JailedPlayers(jail_data)
 
-                    if jail_info.remaining_time <= 0 then
+                    if jail_info.remaining_time > 0 then
+                        minetest.after(1, update_jail_time)
+                    else
                         atl_server_jail.unjail_player(player_name)
-                        return
                     end
                 end
-            end)
+            end
+
+            minetest.after(1, update_jail_time)
         end
     end
 end
