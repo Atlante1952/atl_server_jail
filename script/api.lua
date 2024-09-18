@@ -35,6 +35,14 @@ function atl_server_jail.set_PlayerPrivs(player_name, privs)
     atl_server_jail.set_serialized_data("player_privs_" .. player_name, privs)
 end
 
+function atl_server_jail.get_PlayerCoords(player_name)
+    return atl_server_jail.get_serialized_data("player_coords_" .. player_name)
+end
+
+function atl_server_jail.set_PlayerCoords(player_name, coords)
+    atl_server_jail.set_serialized_data("player_coords_" .. player_name, coords)
+end
+
 function atl_server_jail.jail_player(player_name, time, reason)
     local jail_data = atl_server_jail.get_JailedPlayers()
     jail_data[player_name] = {
@@ -49,6 +57,9 @@ function atl_server_jail.jail_player(player_name, time, reason)
     if player then
         local jail_coords = atl_server_jail.get_JailCoords()
         if jail_coords then
+            local player_coords = player:get_pos()
+            atl_server_jail.set_PlayerCoords(player_name, player_coords)
+
             player:set_pos(jail_coords)
             minetest.chat_send_player(player_name, "-!- You were put in jail | <> | During " .. time .. " seconds | <> | Reason: " .. reason)
         end
@@ -77,7 +88,10 @@ function atl_server_jail.unjail_player(player_name)
 
         local player = minetest.get_player_by_name(player_name)
         if player then
-            player:set_pos({x = 0, y = 0, z = 0})
+            local player_coords = atl_server_jail.get_PlayerCoords(player_name)
+            if player_coords then
+                player:set_pos(player_coords)
+            end
             minetest.chat_send_player(player_name, "You have been released from jail.")
         end
 
