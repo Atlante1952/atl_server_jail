@@ -106,8 +106,6 @@ function atl_server_jail.check_and_apply_jail(player_name)
             minetest.after(jail_info.remaining_time, function()
                 atl_server_jail.unjail_player(player_name)
             end)
-
-            -- Schedule periodic updates to decrement remaining time
             local function update_jail_time()
                 local jail_data = atl_server_jail.get_JailedPlayers()
                 local jail_info = jail_data[player_name]
